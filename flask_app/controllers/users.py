@@ -18,13 +18,13 @@ def create_user ():
     #Validations should be in the model
     if not User.validate_user(request.form):
         return redirect('/')
-    
+    #Make sure the email is not already in use
     data = { 'email' : request.form['email'] }
     user_in_db = User.get_by_email(data)
     if user_in_db:
         flash('Email already in use')
         return redirect('/')
-    
+    #Hash the password
     pw_hash = bcrypt.generate_password_hash(request.form['password'])
 
     #Are we saving any other user data?
@@ -35,7 +35,6 @@ def create_user ():
         'password' : pw_hash
     }
     user = User.save(data)
-    session['user_id'] = user.id
     return redirect('/')
 
 @app.route('/login', methods=['POST'] )
@@ -45,13 +44,10 @@ def login():
     #Validations for Login:
     #Email Validation
     if not user_in_db:
-        print(user_in_db)
         flash("Invalid Email")
         return redirect('/')
     #Password Validation
     if not bcrypt.check_password_hash(user_in_db.password, request.form['password']):
-        print(bcrypt.generate_password_hash(request.form['password']))
-        print(user_in_db.password)
         flash('Invalid Password')
         return redirect('/')
     
@@ -59,24 +55,28 @@ def login():
 
     return redirect('/dashboard')
 
+#Logout User
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect('/')
 
+#Delete User
 @app.route('/delete')
 def delete():
     data = { 'id' : session['user_id'] }
     User.delete(data)
     return redirect('/')
 
+#Dashboard
 @app.route('/dashboard')
 def dashboard():
-    #User must be loggin in to view the dashboard
+    #User must be logged in to view the dashboard
     if not 'user_id' in session:
         return redirect('/')
-    user_data = { 'id' : session['user_id']}
-    user = User.get_by_id(user_data)
+    #Get the user from the database
+    data = { 'id' : session['user_id']}
+    user = User.get_by_id(data)
     #Passing in user, users, and books in case you need them
     return render_template('dashboard.html', user = user, users = User.getAll(), books = Book.getAll())
 
