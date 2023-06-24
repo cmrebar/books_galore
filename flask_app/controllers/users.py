@@ -16,7 +16,7 @@ def index():
 def create_user ():
     #Make sure the form data is valid
     #Validations should be in the model
-    if not User.validate_user(request.form):
+    if not User.validate_reg(request.form):
         return redirect('/')
     #Make sure the email is not already in use
     data = { 'email' : request.form['email'] }
