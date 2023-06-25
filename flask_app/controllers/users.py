@@ -9,8 +9,7 @@ bcrypt = Bcrypt(app)
 def index():
     if not 'user_id' in session:
         flash('You must login to continue')
-        #index.html is the login page
-    return render_template('index.html')
+    return render_template('login.html')
 
 @app.route('/register', methods=['POST'])
 def create_user ():
