@@ -26,14 +26,14 @@
 <body>
     <header class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="/">Books Galore</a>
+            <a class="navbar-brand" href="/dashboard">Books Galore</a>
         </div>
     </header>
     <div class="form-container">
         <div class="row mt-3">
             <div class="col">
                 <h1>Login</h1>
-                    <form action="#" method="POST">
+                    <form action="/login" method="POST">
                         <div class="mb-3">
                             <input type="email" name="email" class="form-control" placeholder="Email" aria-label="Email">
                         </div>
@@ -61,7 +61,7 @@
         <div class="row mt-3">
             <div class="col">
                 <h1>Registration</h1>
-                <form action="#" method="POST">
+                <form action="/register" method="POST">
                     <div class="mb-3">
                         <input type="text" name="first_name" class="form-control" placeholder="First name" aria-label="First name">
                     </div>
@@ -75,7 +75,7 @@
                         <input type="password" name="password" class="form-control" placeholder="Password" aria-label="Password">
                     </div>
                     <div class="mb-3">
-                        <input type="password" name="confirm_password" class="form-control" placeholder="Confirm password" aria-label="Confirm password">
+                        <input type="password" name="confirm" class="form-control" placeholder="Confirm password" aria-label="Confirm password">
                     </div>
                     <button type="submit" class="btn btn-primary">Register</button>
                 </form>

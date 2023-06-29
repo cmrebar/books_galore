@@ -1,6 +1,7 @@
-from flask_app.config.mysql import connectToMySQL
+from flask_app.config.mysqlconnection import connectToMySQL
 from flask import flash
 from flask_app.models import user
+from flask_app.models import review
 
 class Book:
     def __init__(self, data):
@@ -8,15 +9,17 @@ class Book:
         self.title = data['title']
         self.author = data['author']
         self.genre = data['genre']
+        self.cover_image = data['cover_image']
         self.created_at = data['created_at']
         self.updated_at = data['updated_at']
         self.user_id = data['user_id']
+        self.reviews = []
         self.creator = None
 
     @classmethod
-    def get_all(cls):
+    def getAll(cls):
         query = "SELECT * FROM books JOIN users on books.user_id = users.id;"
-        results = connectToMySQL("books_schema").query_db(query)
+        results = connectToMySQL("books_galore").query_db(query)
         books = []
         for row in results:
             the_book = cls(row)
@@ -36,39 +39,60 @@ class Book:
     @classmethod
     def get_by_id(cls,data):
         query = "SELECT * FROM books JOIN users on books.user_id = users.id WHERE books.id = %(id)s;"
-        result = connectToMySQL("books_schema").query_db(query,data)
+        result = connectToMySQL("books_galore").query_db(query,data)
         if not result:
             return False
 
         result = result[0]
         book = cls(result)
-        data = {
-                "id": result['users.id'],
-                "first_name": result['first_name'],
-                "last_name": result['last_name'],
-                "email": result['email'],
-                "location": result['location'],
-                "password": "",
-                "created_at": result['users.created_at'],
-                "updated_at": result['users.updated_at']
-        }
-        book.creator = user.User(data)
+        book.creator = user.User.get_by_id({"id": result['users.id']})
         return book
 
     @classmethod
-    def add_book(cls, data):
-        query = "INSERT INTO books (title, author, genre, user_id) VALUES (%(title)s, %(author)s, %(genre)s, %(user_id)s);"
-        return connectToMySQL("books_schema").query_db(query,data)
+    def get_book_with_reviews(cls,data):
+        query = "SELECT * FROM books LEFT JOIN reviews on books.id = reviews.book_id WHERE books.id = %(id)s;"
+        results = connectToMySQL("books_galore").query_db(query,data)
+        if not results:
+            return False
+        book = cls(results[0])
+        print(results)
+        print(book.reviews)
+        for row in results:
+            review_data = {
+                "id": row['reviews.id'],
+                "content": row['content'],
+                "created_at": row['created_at'],
+                "updated_at": row['updated_at'],
+                "user_id": row['reviews.user_id'],
+                "book_id": row['book_id']
+            }
+            book.reviews.append(review.Review(review_data))
+        return book
+    
+    @classmethod
+    def get_by_title(cls,data):
+        query = "SELECT * FROM books WHERE books.title = %(title)s;"
+        result = connectToMySQL("books_galore").query_db(query,data)
+        if not result:
+            return False
+
+        result = result[0]
+        book = cls(result)
+        return book
+    @classmethod
+    def save(cls, data):
+        query = "INSERT INTO books (title, author, genre, cover_image, user_id) VALUES (%(title)s, %(author)s, %(genre)s, %(cover_image)s, %(user_id)s);"
+        return connectToMySQL("books_galore").query_db(query,data)
 
     @classmethod
     def delete(cls, data):
         query = "DELETE FROM books WHERE id = %(id)s;"
-        return connectToMySQL("books_schema").query_db(query,data)
+        return connectToMySQL("books_galore").query_db(query,data)
 
     @classmethod
     def update(cls, data):
-        query = "UPDATE books SET title = %(title)s, author = %(author)s, genre = %(genre)s WHERE id = %(id)s;"
-        return connectToMySQL("books_schema").query_db(query,data)
+        query = "UPDATE books SET title = %(title)s, author = %(author)s, genre = %(genre)s, cover_image = %(cover_image)s WHERE id = %(id)s;"
+        return connectToMySQL("books_galore").query_db(query,data)
 
     @staticmethod
     def validate_book(book):

@@ -77,5 +77,5 @@ def dashboard():
     data = { 'id' : session['user_id']}
     user = User.get_by_id(data)
     #Passing in user, users, and books in case you need them
-    return render_template('dashboard.html', user = user, users = User.getAll(), books = Book.getAll())
+    return render_template('index.html', user = user, users = User.getAll(), books = Book.getAll())
 
